@@ -1,0 +1,95 @@
+/*
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+# for the specific language governing rights and limitations under the
+# License.
+#
+#
+# The Original Code is Daim code.
+#
+# The Initial Developer of the Original Code is
+#   David Marteau
+# Portions created by the Initial Developer are Copyright (C) 2008
+# the Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#   David Marteau (dhmarteau@gmail.com)
+#
+# Alternatively, the contents of this file may be used under the terms of
+# either of the GNU General Public License Version 2 or later (the "GPL"),
+# or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+# in which case the provisions of the GPL or the LGPL are applicable instead
+# of those above. If you wish to allow use of your version of this file only
+# under the terms of either the GPL or the LGPL, and not to allow others to
+# use your version of this file under the terms of the MPL, indicate your
+# decision by deleting the provisions above and replace them with the notice
+# and other provisions required by the GPL or the LGPL. If you do not delete
+# the provisions above, a recipient may use your version of this file under
+# the terms of any one of the MPL, the GPL or the LGPL.
+#
+# ***** END LICENSE BLOCK *****
+*/
+
+#include "cciIXPCOMSupports.idl"
+
+/*
+ * Map cci type to xpcom/nspr type
+ */
+
+typedef octet              dm_uint8  ; // PRUint8
+typedef octet              dm_byte   ; // PRUint8
+typedef unsigned short     dm_uint16 ; // PRUint16
+typedef unsigned short     dm_unichar; // PRUnichar
+typedef unsigned long      dm_uint32 ; // PRUint32
+typedef unsigned long long dm_uint64 ; // PRUint64
+typedef short              dm_int16  ; // PRInt16
+typedef long               dm_int32  ; // PRInt32
+typedef long long          dm_int64  ; // PRInt64
+
+typedef unsigned long      cci_refcnt ;
+typedef unsigned long      cci_result ;
+
+//typedef unsigned long       size_t;
+
+typedef double              dm_real   ;
+
+[ptr] native bytePtr(PRUint8);
+
+// Native array of char pointer
+native charPtrArray(char * *);
+native unicharPtrArray(dm_unichar * *);
+[ref] native charPtrArrayRef(char * *);
+[ref] native unicharPtrArrayRef(dm_unichar * *);
+
+%{C++
+
+typedef void*        dm_ptr;
+typedef int          dm_int;
+typedef unsigned int dm_uint;
+
+// Redefine some CCI macros
+#define CCI_CALLBACK NS_CALLBACK
+
+/*
+ * Start commenting out the C++ versions of the below in the output header
+ */
+#if 0
+%}
+
+[ptr]   native intArray(dm_int32);
+[ptr]   native doubleArray(dm_real);
+[ptr]   native pointArray(dm_point);
+[ptr]   native labelArray(dm_int32);
+
+%{C++
+/*
+ * End commenting out the C++ versions of the above in the output header
+ */
+#endif
+%}
+
+
+typedef nsISupports cciXPCOMSupports;
+
+

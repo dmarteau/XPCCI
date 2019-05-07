@@ -1,0 +1,9 @@
+
+// Define the number of bytes of type 'int'
+#undef DM_BYTES_PER_INT
+
+// Define the number of bytes of type 'long'
+#undef DM_BYTES_PER_LONG
+
+// Define the number of bytes of type 'long'
+#undef DM_BYTES_PER_POINTER

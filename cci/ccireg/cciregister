@@ -1,0 +1,31 @@
+#!/bin/sh
+# Usage: cciregister target [dir1,...] 
+
+TARGET=$1
+
+CURRENTDIR=$(pwd)
+
+shift 1
+
+for DIR in $*; do
+    cd $DIR
+    MODULES="$MODULES $(find . -name '*.cci' | sed 's/.\///' | tr '\n' ' ')"
+done
+
+cd $CURRENTDIR
+
+if [ "x$(uname)" = "xDarwin" ] ; then
+
+export CCI_COMPONENTS=$(echo "$*" | sed -E 's/ +/:/g')
+
+else
+
+export CCI_COMPONENTS=$(echo "$*" | sed 's/ +/:/g')
+
+fi
+
+
+echo $CCI_COMPONENTS
+echo $MODULES
+
+./ccireg $TARGET $MODULES

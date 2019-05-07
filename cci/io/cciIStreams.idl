@@ -1,0 +1,166 @@
+/*
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+# for the specific language governing rights and limitations under the
+# License.
+#
+#
+# The Original Code is Daim code.
+#
+# The Initial Developer of the Original Code is
+#   David Marteau
+# Portions created by the Initial Developer are Copyright (C) 2008
+# the Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#   David Marteau (dhmarteau@gmail.com)
+#
+# Alternatively, the contents of this file may be used under the terms of
+# either of the GNU General Public License Version 2 or later (the "GPL"),
+# or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+# in which case the provisions of the GPL or the LGPL are applicable instead
+# of those above. If you wish to allow use of your version of this file only
+# under the terms of either the GPL or the LGPL, and not to allow others to
+# use your version of this file under the terms of the MPL, indicate your
+# decision by deleting the provisions above and replace them with the notice
+# and other provisions required by the GPL or the LGPL. If you do not delete
+# the provisions above, a recipient may use your version of this file under
+# the terms of any one of the MPL, the GPL or the LGPL.
+#
+# ***** END LICENSE BLOCK *****
+*/
+
+#include "cciISupports.idl"
+
+interface cciIInputStream;
+interface cciIOutputStream;
+
+
+%{C++
+/**
+ * The signature of the writer function passed to ReadSegments. This
+ * is the "consumer" of data that gets read from the stream's buffer.
+ *
+ * @param aInStream stream being read
+ * @param aClosure opaque parameter passed to ReadSegments
+ * @param aFromSegment pointer to memory owned by the input stream.  This is
+ *                     where the writer function should start consuming data.
+ * @param aToOffset amount of data already consumed by this writer during this
+ *                  ReadSegments call.  This is also the sum of the aWriteCount
+ *                  returns from this writer over the previous invocations of
+ *                  the writer by this ReadSegments call.
+ * @param aCount Number of bytes available to be read starting at aFromSegment
+ * @param [out] aWriteCount number of bytes read by this writer function call
+ *
+ * Implementers should return the following:
+ *
+ * @return CCI_OK and (*aWriteCount > 0) if consumed some data
+ * @return <any-error> if not interested in consuming any data
+ *
+ * Errors are never passed to the caller of ReadSegments.
+ *
+ * NOTE: returning CCI_OK and (*aWriteCount = 0) has undefined behavior.
+ *
+ * @status FROZEN
+ */
+typedef CCI_CALLBACK(cciWriteSegmentFun)(cciIInputStream *aInStream,
+                                         void *aClosure,
+                                         const dm_uint8 *aFromSegment,
+                                         dm_uint32 aToOffset,
+                                         dm_uint32 aCount,
+                                         dm_uint32 *aWriteCount);
+%}
+
+
+native cciWriteSegmentFun(cciWriteSegmentFun);
+
+[uuid(b34246e2-f9be-4ef1-9b1c-ce3da046b9ed)]
+interface cciIInputStream : cciISupports
+{
+  [notxpcom] dm_uint32 available();
+
+  void close();
+
+  dm_uint32 read( [array,size_is(count)] in octet data, in dm_uint32 count );
+
+  dm_uint32 readSegments ( in cciWriteSegmentFun writer ,
+                           in voidPtr closure ,
+                           in dm_uint32 count );
+
+  [notxpcom] boolean isNonBlocking();
+
+  [notxpcom] string getContentType();
+  [notxpcom] void   setContentType( in string type );
+};
+
+%{C++
+/**
+ * The signature for the reader function passed to WriteSegments. This
+ * is the "provider" of data that gets written into the stream's buffer.
+ *
+ * @param aOutStream stream being written to
+ * @param aClosure opaque parameter passed to WriteSegments
+ * @param aToSegment pointer to memory owned by the output stream
+ * @param aFromOffset amount already written (since WriteSegments was called)
+ * @param aCount length of toSegment
+ * @param aReadCount number of bytes written
+ *
+ * Implementers should return the following:
+ *
+ * @return CCI_OK and (*aReadCount > 0) if successfully provided some data
+ * @return CCI_OK and (*aReadCount = 0) or
+ * @return <any-error> if not interested in providing any data
+ *
+ * Errors are never passed to the caller of WriteSegments.
+ *
+ * @status FROZEN
+ */
+typedef CCI_CALLBACK(cciReadSegmentFun)(cciIOutputStream *aOutStream,
+                                        void *aClosure,
+                                        dm_uint8 *aToSegment,
+                                        dm_uint32 aFromOffset,
+                                        dm_uint32 aCount,
+                                        dm_uint32 *aReadCount);
+%}
+
+native cciReadSegmentFun(cciReadSegmentFun);
+
+[uuid(65c78f50-b1a7-4e32-80aa-b687fc448add)]
+interface cciIOutputStream : cciISupports
+{
+  void close();
+
+  void flush();
+
+  dm_uint32 write( [array,size_is(count)] in octet data, in dm_uint32 count );
+
+  dm_uint32 writeFrom( in cciIInputStream fromStream, in dm_uint32 count );
+
+  unsigned long writeSegments(in cciReadSegmentFun aReader,
+                              in voidPtr aClosure,
+                              in dm_uint32 aCount);
+
+  [notxpcom] boolean isNonBlocking();
+
+  [notxpcom] string getContentType();
+  [notxpcom] void   setContentType( in string type );
+
+};
+
+
+[uuid(8429d350-1040-4661-8b71-f2a6ba455980)]
+interface cciISeekableStream : cciISupports
+{
+  void seek ( in dm_int32 whence , in dm_uint32 offset );
+
+  void setEOF();
+
+  dm_uint32 tell();
+
+  const dm_int32 DM_SEEK_SET  = 0;
+  const dm_int32 DM_SEEK_CUR  = 1;
+  const dm_int32 DM_SEEK_END  = 2;
+};
+
+

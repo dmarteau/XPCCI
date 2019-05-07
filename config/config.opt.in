@@ -1,0 +1,33 @@
+#=======================================
+# Build configuration
+#=======================================
+
+topsrcdir = @topsrcdir@
+
+# Debug configuration
+@debug_config@
+
+DM_OBJDIR = @DM_OBJDIR@
+
+DM_RUNTIME_VER_MAJOR    = @DM_RUNTIME_VER_MAJOR@
+DM_RUNTIME_VER_MINOR    = @DM_RUNTIME_VER_MINOR@
+DM_RUNTIME_VER_REVISION = @DM_RUNTIME_VER_REVISION@
+
+# Build unit tests
+BUILD_TESTS:=@ENABLE_TESTS@
+
+BUILD_CONFIG=@DM_BUILD_CONFIG@
+
+OS_ARCH=@OS_ARCH@
+OS_SUB_ARCH=@OS_SUB_ARCH@
+
+DLLPREFIX=@DLLPREFIX@
+LIBPREFIX=@DLLPREFIX@
+LIBSFX=@LIBSFX@
+DLLSFX=@DLLSFX@
+EXESFX=@EXESFX@
+
+#=======================================
+# Optional modules
+#=======================================
+

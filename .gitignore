@@ -1,0 +1,27 @@
+
+*.pyc
+.DS_Store$
+
+myconfig.mk
+myrules.mk
+
+# configure files
+.cache
+config.status
+config.log
+
+config/config.opt
+ac_dm_config.h
+
+autom4te.cache
+
+.cproject
+.settings
+.project
+
+xpidl_debug
+xpidllex.py
+xpidlyacc.py
+
+build-*
+
