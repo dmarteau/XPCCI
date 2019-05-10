@@ -45,26 +45,9 @@
 #include "cciDebug.h"
 #endif
 
-
-/**
- * Macro for instantiating a new object that implements cciISupports.
- * Note that you can only use this if you adhere to the no arguments
- * constructor com policy (which you really should!).
- * @param _result Where the new instance pointer is stored
- * @param _type The type of object to call "new" with.
- */
-#define CCI_NEWOBJECT(_result,_type)                                      \
-  DM_BEGIN_MACRO                                                           \
-    _result = new _type();                                                 \
-  DM_END_MACRO
-
-#define CCI_NEWOBJECT_ARGS(_result,_type,_args)                           \
-  DM_BEGIN_MACRO                                                           \
-    _result = new _type(_args);                                            \
-  DM_END_MACRO
-
 /**
  * Macro for deleting an object that implements cciISupports.
+ * Convenient for passing as other macro argument.
  * @param _ptr The object to delete.
  */
 #define CCI_DELETEOBJECT(_ptr)   \

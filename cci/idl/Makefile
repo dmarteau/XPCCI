@@ -24,8 +24,8 @@ IDLSRC = ccirootidl.idl \
          cciICategoryManager.idl \
          cciIMemory.idl \
          cciIStringIterator.idl \
-         cciIXPCOMSupports.idl \
          cciIWeakReference.idl \
+         cciIProgrammingLanguage.idl \
          $(NULL)
 
 include $(topsrcdir)/config/rules.mk

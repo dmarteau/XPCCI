@@ -38,6 +38,8 @@ IDLDIR=$(BUILD_DIR)/$(MOD_PATH)idl
 
 MODULE_INCL += $(INCDIR)
 
+STAGE_DIR=$(BUILD_DIR)/.parts/$(MODULE_NAME)
+
 ifdef LIBRARY_NAME
 OBJDIR=$(BUILD_DIR)/.parts/$(LIBRARY_NAME)
 endif
@@ -92,7 +94,7 @@ else
 
 ifeq ($(IS_COMPONENT),1)
 MODULE_LIBRARY_NAME = $(LIBRARY_NAME).cci
-MODULE_EXPORT = $(CCIDIR)/$(MODULE_NAME)/$(MODULE_LIBRARY_NAME)
+MODULE_EXPORT = $(CCIDIR)/$(MODULE_LIBRARY_NAME)
 MODULE_FILES += cciComponentGlue.cpp
 VPATH += :$(topsrcdir)/cci/glue
 MODULE_SHARED:=1
@@ -178,35 +180,33 @@ endif
 
 # Add rules for building idl headers
 ifdef IDLSRC
-BUILD_IDL=build_idl
-CLEAN_IDL=clean_idl
 include $(topsrcdir)/config/idl.mk
 endif
 
+.PHONY: $(DIRS)
 
-.PHONY: $(DIRS) $(BUILD_IDL)
-
-module: export build_idl0 libs
+module: export xpidl libs
 
 libs:: $(DIRS) $(BUILD)
 
-build_idl0: $(BUILD_IDL)
+xpidl:: 
 ifdef DIRS
 	@for d in $(DIRS); do \
-		$(MAKE) -C $$d build_idl0; \
+		$(MAKE) -C $$d xpidl || exit 1; \
 	done
 endif	
 
 include $(MAKE_TARGET)
 
-clean:: $(CLEAN_SUBDIRS) clean_deps $(CLEAN) $(CLEAN_IDL)
+clean:: $(CLEAN_SUBDIRS) clean_deps $(CLEAN)
 
 export::
 ifdef MODULE_PACKAGE
 	@echo "Building module for package $(MODULE_PACKAGE)"
 endif
+	@mkdir -p $(STAGE_DIR)
 ifdef OBJDIR
-	mkdir -p $(OBJDIR)
+	@mkdir -p $(OBJDIR)
 endif
 	@mkdir -p $(BINDIR)
 	@mkdir -p $(LIBDIR)
@@ -270,3 +270,5 @@ echo-module:
 
 echo-requires:
 	@echo $(REQUIRES)
+
+

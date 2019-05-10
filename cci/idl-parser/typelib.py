@@ -251,57 +251,58 @@ def write_typelib(idl, fd, filename):
     typelib = xpt.Typelib(interfaces=ifaces)
     typelib.writefd(fd)
 
-if __name__ == '__main__':
-    from optparse import OptionParser
-    o = OptionParser()
-    o.add_option('-I', action='append', dest='incdirs', default=['.'],
+
+def main(argv=None):
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', help='idl input file') 
+    parser.add_argument('-I', action='append', dest='incdirs', default=[],
                  help="Directory to search for imported files")
-    o.add_option('--cachedir', dest='cachedir', default=None,
+    parser.add_argument('--cachedir', dest='cachedir', default='.',
                  help="Directory in which to cache lex/parse tables.")
-    o.add_option('-o', dest='outfile', default=None,
-                 help="Output file")
-    o.add_option('-d', dest='depfile', default=None,
+    parser.add_argument('-o', dest='outfile', required=True,
+                 help="Output file (required)")
+    parser.add_argument('-d', dest='depfile', default=None,
                  help="Generate a make dependency file")
-    o.add_option('--regen', action='store_true', dest='regen', default=False,
+    parser.add_argument('--regen', action='store_true', dest='regen', default=False,
                  help="Regenerate IDL Parser cache")
-    options, args = o.parse_args()
-    file = args[0] if args else None
 
-    if options.cachedir is not None:
-        if not os.path.isdir(options.cachedir):
-            os.mkdir(options.cachedir)
-        sys.path.append(options.cachedir)
+    args = parser.parse_args(argv)
 
-    if options.regen:
-        if options.cachedir is None:
-            print >>sys.stderr, "--regen requires --cachedir"
-            sys.exit(1)
+    cachedir = args.cachedir
+    if not os.path.isdir(cachedir):
+        os.mkdir(cachedir)
+    sys.path.append(cachedir)
 
-        p = xpidl.IDLParser(outputdir=options.cachedir, regen=True)
-        sys.exit(0)
+    # Delete the lex/yacc files.  Ply is too stupid to regenerate them
+    # properly
+    if args.regen:
+        for fileglobs in [os.path.join(args.cachedir, f) for f in ["xpidllex.py*", "xpidlyacc.py*"]]:
+            for filename in glob.glob(fileglobs):
+                os.remove(filename)
 
-    if options.depfile is not None and options.outfile is None:
-        print >>sys.stderr, "-d requires -o"
-        sys.exit(1)
-
-    if options.outfile is not None:
-        outfd = open(options.outfile, 'wb')
-        closeoutfd = True
+    if args.outfile:
+        outfd = open(args.outfile,'wb')
     else:
-        raise "typelib generation requires an output file"
+        outfd = sys.stdout
 
-    p = xpidl.IDLParser(outputdir=options.cachedir)
-    idl = p.parse(open(file).read(), filename=file)
-    idl.resolve(options.incdirs, p)
-    write_typelib(idl, outfd, file)
+    inputfile = args.input
 
-    if closeoutfd:
-        outfd.close()
+    p = xpidl.IDLParser(outputdir=cachedir)
+    idl = p.parse(open(inputfile).read(), filename=inputfile)
+    idl.resolve(args.incdirs, p)
+    write_typelib(idl, outfd, inputfile)
 
-    if options.depfile is not None:
-        depfd = open(options.depfile, 'w')
+    if args.depfile is not None:
+        depfd = open(args.depfile, 'w')
         deps = [dep.replace('\\', '/') for dep in idl.deps]
 
-        print >>depfd, "%s: %s" % (options.outfile, " ".join(deps))
+        print("%s: %s" % (args.outfile, " ".join(deps)), file=depfd)
         for dep in deps:
-            print >>depfd, "%s:" % dep
+            print("%s:" % dep, file=depfd)
+
+if __name__ == '__main__':
+    main()
+
+

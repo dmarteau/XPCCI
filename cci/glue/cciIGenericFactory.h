@@ -396,7 +396,7 @@ _InstanceClass##Constructor(cciISupports *aOuter, DM_REFIID aIID,             \
         return rv;                                                            \
     }                                                                         \
                                                                               \
-    CCI_NEWOBJECT(inst, _InstanceClass);                                      \
+    inst = new _InstanceClass();                                              \
     if (NULL == inst) {                                                       \
         rv = CCI_ERROR_OUT_OF_MEMORY;                                         \
         return rv;                                                            \
@@ -424,7 +424,7 @@ _InstanceClass##Constructor(cciISupports *aOuter, DM_REFIID aIID,             \
         return rv;                                                            \
     }                                                                         \
                                                                               \
-    CCI_NEWOBJECT(inst, _InstanceClass);                                      \
+    inst = new _InstanceClass();                                              \
     if (NULL == inst) {                                                       \
         rv = CCI_ERROR_OUT_OF_MEMORY;                                         \
         return rv;                                                            \

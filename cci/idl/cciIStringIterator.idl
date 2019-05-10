@@ -33,12 +33,21 @@
 
 #include "cciISupports.idl"
 
-/*
- * dummy interface to make cciISupports inherit from cciISupports
- */
-[scriptable, uuid(48f8a6b5-d0cd-4e67-a74a-f8b80466ea06)]
-interface cciIXPCOMSupports : cciISupports {
+[scriptable, uuid(d92dd90e-ff5e-4ff3-bf4c-f0eda0b26cee)]
+interface cciIStringIterator : cciISupports
+{
+  void getNext([shared,retval] out wstring value );
 
+  boolean hasMore();
 };
+
+[scriptable, uuid(365e77bb-aac1-4329-97fe-ebcaa5552895)]
+interface cciIUTF8StringIterator : cciISupports
+{
+  void getNext([shared,retval] out string value );
+
+  boolean hasMore();
+};
+
 
 

@@ -579,6 +579,10 @@ def main(argv=None):
             for filename in glob.glob(fileglobs):
                 os.remove(filename)
 
+    if args.depfile is not None and args.outfile is None:
+        print("-d requires -o",file=sys.stderr)
+        sys.exit(1)
+
     if args.outfile:
         outfd = open(args.outfile,'w')
     else:
@@ -599,5 +603,5 @@ def main(argv=None):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
 

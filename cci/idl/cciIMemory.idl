@@ -31,13 +31,13 @@
 # ***** END LICENSE BLOCK *****
 */
 
-#include "cciIXPCOMSupports.idl"
+#include "cciISupports.idl"
 
 /**
  * cciIMemory: interface to allocate and deallocate memory.
  */
 [scriptable, uuid(a6c393b2-271c-4ce7-bfb8-5c2eeac3b70d)]
-interface cciIMemory : cciIXPCOMSupports
+interface cciIMemory : cciISupports
 {
   /**
    * Allocates a block of memory of a particular size. If the memory 
