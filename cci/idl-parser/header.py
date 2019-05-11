@@ -560,6 +560,8 @@ def main(argv=None):
                  help="Directory in which to cache lex/parse tables.")
     parser.add_argument('-o', dest='outfile', default=None,
                  help="Output file (default is stdout)")
+    parser.add_argument('-xpt', dest='xpt', default=None,
+                 help="Generate typelib file")
     parser.add_argument('-d', dest='depfile', default=None,
                  help="Generate a make dependency file")
     parser.add_argument('--regen', action='store_true', dest='regen', default=False,
@@ -594,6 +596,11 @@ def main(argv=None):
     idl = p.parse(open(inputfile).read(), filename=inputfile)
     idl.resolve(args.incdirs, p)
     print_header(idl, outfd, inputfile)
+
+    if args.xpt is not None:
+        from typelib import write_typelib
+        with open(args.xpt,'wb') as fd: 
+            write_typelib(idl, fd, inputfile)
 
     if args.depfile is not None:
         depfd = open(args.depfile, 'w')

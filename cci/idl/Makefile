@@ -7,7 +7,9 @@ VPATH = ./
 
 include $(DEPTH)/config/config.mk
 
-MODULE_NAME  = cci
+MODULE_NAME = cci
+
+XPIDL_MODULE = xpcci_base
 
 IDLSRC = ccirootidl.idl \
          cciISupports.idl \

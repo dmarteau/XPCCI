@@ -78,6 +78,39 @@ XPT_MAGIC = b'XPCOM\nTypeLib\r\n\x1a'
 TYPELIB_VERSION = (1, 2)
 
 
+def cmp(x, y):
+    """
+    Replacement for built-in function cmp that was removed in Python 3
+
+    Compare the two objects x and y and return an integer according to
+    the outcome. The return value is negative if x < y, zero if x == y
+    and strictly positive if x > y.
+    """
+    return (x > y) - (x < y)
+
+
+class Comparable:
+    """ Implement python 3 Rich Comparisons for subclass that have a __cmp__ function defined
+    """
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+
+
 class FileFormatError(Exception):
     pass
 
@@ -87,7 +120,7 @@ class DataError(Exception):
 
 
 # Descriptor types as described in the spec
-class Type(object):
+class Type(Comparable):
     """
     Data type of a method parameter or return value. Do not instantiate
     this class directly. Rather, use one of its subclasses.
@@ -142,7 +175,7 @@ class Type(object):
     def __cmp__(self, other):
         return (
             # First make sure we have two Types of the same type (no pun intended!)
-            cmp(type(self), type(other)) or
+            cmp(str(type(self)), str(type(other))) or
             cmp(self.pointer, other.pointer) or
             cmp(self.reference, other.reference)
         )
@@ -553,7 +586,7 @@ class WideStringWithSizeType(Type):
         return "wstring_s"
 
 
-class Param(object):
+class Param(Comparable):
     """
     A parameter to a method, or the return value of a method.
     (ParamDescriptor from the typelib specification.)
@@ -683,7 +716,7 @@ class Param(object):
         return self.prefix() + str(self.type)
 
 
-class Method(object):
+class Method(Comparable):
     """
     A method of an interface, defining its associated parameters
     and return value.
@@ -840,7 +873,7 @@ class Method(object):
             self._name_offset = 0
 
 
-class Constant(object):
+class Constant(Comparable):
     """
     A constant value of a specific type defined on an interface.
     (ConstantDesciptor from the typelib specification.)
@@ -920,7 +953,7 @@ class Constant(object):
         return "Constant(%s, %s, %d)" % (self.name, str(self.type), self.value)
 
 
-class Interface(object):
+class Interface(Comparable):
     """
     An Interface represents an object, with its associated methods
     and constant values.
@@ -1112,7 +1145,7 @@ class Interface(object):
             c.write_name(file, data_pool_offset)
 
 
-class Typelib(object):
+class Typelib:
     """
     A typelib represents one entire typelib file and all the interfaces
     referenced within, whether defined entirely within the typelib or
@@ -1368,7 +1401,7 @@ def xpt_link(inputs):
         return Typelib.read(i)
 
     if not inputs:
-        print >>sys.stderr, "Usage: xpt_link <destination file> <input files>"
+        print("Usage: xpt_link <destination file> <input files>",file=sys.stderr)
         return None
     # This is the aggregate list of interfaces.
     interfaces = []
@@ -1382,10 +1415,11 @@ def xpt_link(inputs):
     # Sort interfaces by name so we can merge adjacent duplicates
     interfaces.sort(key=operator.attrgetter('name'))
 
-    Result = enum('Equal',     # Interfaces the same, doesn't matter
-                  'NotEqual',  # Interfaces differ, keep both
-                  'KeepFirst',  # Replace second interface with first
-                  'KeepSecond')  # Replace first interface with second
+    Result = IntEnum('Result',[
+                  'Equal',        # Interfaces the same, doesn't matter
+                  'NotEqual',     # Interfaces differ, keep both
+                  'KeepFirst',    # Replace second interface with first
+                  'KeepSecond'])  # Replace first interface with second
 
     def compare(i, j):
         """
