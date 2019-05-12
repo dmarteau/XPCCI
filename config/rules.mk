@@ -179,7 +179,7 @@ endif
 
 
 # Add rules for building idl headers
-ifdef XPIDL_MODULE
+ifdef IDLSRC
 include $(topsrcdir)/config/idl.mk
 endif
 
@@ -222,7 +222,7 @@ ifdef EXPORTS
 		cp $(COPY_FLAGS) "$$f" "$(EXPORT_DIR)"; \
 	done
 endif
-ifdef XPIDL_MODULE
+ifdef IDLSRC
 	@mkdir -p $(EXPORT_DIR)
 	@mkdir -p $(IDL_EXPORT_DIR)
 	@for f in $(IDLSRC); do \
@@ -241,7 +241,7 @@ ifdef EXPORTS
 	  rm -f "$(EXPORT_DIR)/$$f"; \
 	done
 endif
-ifdef XPIDL_MODULE
+ifdef IDLSRC
 	@for f in $(IDLSRC); do \
 	  rm -f "$(IDL_EXPORT_DIR)/$$f"; \
 	done

@@ -12,7 +12,8 @@ import os.path
 import re
 import itertools
 import glob
-import xpidl
+
+from xpidl import xpidl
 
 printdoccomments = False
 
@@ -598,7 +599,7 @@ def main(argv=None):
     print_header(idl, outfd, inputfile)
 
     if args.xpt is not None:
-        from typelib import write_typelib
+        from .typelib import write_typelib
         with open(args.xpt,'wb') as fd: 
             write_typelib(idl, fd, inputfile)
 

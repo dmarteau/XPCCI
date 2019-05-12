@@ -27,7 +27,18 @@ LIBSFX=@LIBSFX@
 DLLSFX=@DLLSFX@
 EXESFX=@EXESFX@
 
+#======================================
+# Python configuration
+#======================================
+
+PYTHON=@ac_python_exec@
+
 #=======================================
 # Optional modules
 #=======================================
+
+@ac_enable_python_bindings@
+@ac_python_ldflags@
+@ac_python_includes@
+
 

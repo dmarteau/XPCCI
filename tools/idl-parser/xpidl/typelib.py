@@ -9,8 +9,8 @@
 
 import os
 import sys
-import xpidl
-import xpt
+
+from xpidl import xpidl,xpt
 
 # A map of xpidl.py types to xpt.py types
 TypeMap = {

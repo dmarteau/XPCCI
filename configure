@@ -620,6 +620,12 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+ac_python_pip
+ac_python_exec
+ac_python_includes
+ac_python_ldflags
+ac_enable_python_bindings
+ac_python3_path
 ENABLE_TESTS
 EGREP
 GREP
@@ -692,10 +698,12 @@ enable_option_checking
 enable_debug
 with_config
 enable_tests
+enable_cci_python
 '
       ac_precious_vars='build_alias
 host_alias
 target_alias
+DM_OBJDIR
 CC
 CFLAGS
 LDFLAGS
@@ -1314,6 +1322,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          enable debugging (disabled by default)
   --enable-tests          enable building tests (enabled by default)
+  --enable-cci-python     enable building python bindings (disabled)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1321,6 +1330,7 @@ Optional Packages:
   --with-config=ARG       set the build configuration (default guess)
 
 Some influential environment variables:
+  DM_OBJDIR   Build directory path
   CC          C compiler command
   CFLAGS      C compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -2242,18 +2252,16 @@ case $with_config in
 esac
 
 
-if test "x$DM_OBJDIR" = "x"; then
-  if test "x$enable_debug" = "xyes" ; then
-      DM_OBJDIR=$(pwd)/build-debug-$with_config
 
-  else
-      DM_OBJDIR=$(pwd)/build-release-$with_config
 
-  fi
+if test "x$enable_debug" = "xyes" ; then
+    : "${DM_OBJDIR=$(pwd)/build-debug-$with_config}"
 else
-DM_OBJDIR=$DM_OBJDIR
-
+    : "${DM_OBJDIR=$(pwd)/build-release-$with_config}"
 fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: Build directory is $DM_OBJDIR" >&5
+$as_echo "$as_me: Build directory is $DM_OBJDIR" >&6;}
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -3844,6 +3852,115 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
+
+
+
+# Extract the first word of "python3", so it can be a program name with args.
+set dummy python3; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_ac_python3_path+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $ac_python3_path in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_python3_path="$ac_python3_path" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_python3_path="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+ac_python3_path=$ac_cv_path_ac_python3_path
+if test -n "$ac_python3_path"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_python3_path" >&5
+$as_echo "$ac_python3_path" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "x$ac_python3_path" = "x"; then
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "python3 not found
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking python version" >&5
+$as_echo_n "checking python version... " >&6; }
+if ${ac_cv_ver_python+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_ver_python=`python3 -c 'import sys;print(sys.version[:3])'`
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_ver_python" >&5
+$as_echo "$ac_cv_ver_python" >&6; }
+if test "x$ac_cv_ver_python" \< "x3.4"; then
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "python version 3.5 minimum required
+See \`config.log' for more details" "$LINENO" 5; }
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if python bindings enabled" >&5
+$as_echo_n "checking if python bindings enabled... " >&6; }
+
+# Check whether --enable-cci-python was given.
+if test "${enable_cci_python+set}" = set; then :
+  enableval=$enable_cci_python;
+fi
+
+
+if test "x$enable_cci_python" = "xyes" ; then
+  PYTHON_LIBS=`python3-config --libs`
+  PYTHON_CONFIGDIR=`python3-config --configdir`
+  PYTHON_INCLUDES=`python3-config --includes`
+  ac_enable_python_bindings=ENABLE_PYTHON_BINDINGS:=1
+
+  ac_python_ldflags=PYTHON_LDFLAGS:="-L$PYTHON_CONFIGDIR $PYTHON_LIBS"
+
+  ac_python_includes=PYTHON_INCLUDES:=$PYTHON_INCLUDES
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+
+PYTHON_VENV=$DM_OBJDIR/.virtualenv
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: Creating python build environment" >&5
+$as_echo "$as_me: Creating python build environment" >&6;}
+python3 -m venv $PYTHON_VENV
+
+ac_python_exec=$PYTHON_VENV/bin/python
+
+ac_python_pip=$PYTHON_VENV/bin/pip
+
+
+ac_pip_install="$ac_python_pip install -q --disable-pip-version-check"
+
+$ac_pip_install -e $topsrcdir/tools/idl-parser/.
 
 
 

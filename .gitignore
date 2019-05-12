@@ -25,3 +25,4 @@ xpidlyacc.py
 
 build-*
 
+*.egg-info
